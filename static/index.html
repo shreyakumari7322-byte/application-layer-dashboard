@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Application Layer Visualizer</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-title">
+    <span class="topbar-mark">◐</span>
+    <div>
+      <h1>Application Layer Visualizer</h1>
+      <p>Act on the left. Watch the wire on the right.</p>
+    </div>
+  </div>
+  <div class="topbar-status" id="connectionStatus">
+    <span class="dot"></span> idle
+  </div>
+</header>
+
+<main class="layout">
+
+  <!-- ============ LEFT: ACTIVITY PANEL ============ -->
+  <section class="panel activity-panel">
+    <div class="panel-head">
+      <h2>Activity</h2>
+      <div class="mode-switch" role="tablist">
+        <button class="mode-btn active" data-mode="browse" role="tab">Browsing</button>
+        <button class="mode-btn" data-mode="mail" role="tab">Mail</button>
+        <button class="mode-btn" data-mode="stream" role="tab">Streaming</button>
+      </div>
+    </div>
+
+    <div class="panel-body">
+
+      <!-- Browsing form -->
+      <form class="activity-form" id="form-browse" data-mode="browse">
+        <label for="browse-url">URL</label>
+        <input id="browse-url" type="text" placeholder="www.example.com/page" value="www.example.com" required />
+        <button type="submit" class="primary-btn">Visit</button>
+      </form>
+
+      <!-- Mail form -->
+      <form class="activity-form hidden" id="form-mail" data-mode="mail">
+        <label for="mail-to">To</label>
+        <input id="mail-to" type="text" placeholder="friend@university.edu" value="friend@university.edu" required />
+        <label for="mail-subject">Subject</label>
+        <input id="mail-subject" type="text" placeholder="Assignment notes" value="Notes from class" required />
+        <label for="mail-body">Body</label>
+        <textarea id="mail-body" rows="4" placeholder="Write your message...">Hey — sharing my notes from today's lecture.</textarea>
+        <button type="submit" class="primary-btn">Send</button>
+      </form>
+
+      <!-- Streaming form -->
+      <form class="activity-form hidden" id="form-stream" data-mode="stream">
+        <label for="stream-quality">Quality</label>
+        <select id="stream-quality">
+          <option value="360p">360p</option>
+          <option value="720p" selected>720p</option>
+          <option value="1080p">1080p</option>
+        </select>
+        <div class="stream-controls">
+          <button type="button" class="primary-btn" id="stream-play">Play</button>
+          <button type="button" class="secondary-btn" id="stream-pause" disabled>Pause</button>
+        </div>
+        <div class="stream-visual" id="stream-visual">
+          <div class="stream-visual-bar" id="stream-visual-bar"></div>
+        </div>
+      </form>
+
+      <div class="activity-status" id="activityStatus">Ready.</div>
+
+      <div class="activity-log">
+        <h3>Activity Log</h3>
+        <ul id="activityLog"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RIGHT: PROTOCOL PANEL ============ -->
+  <section class="panel protocol-panel">
+    <div class="panel-head">
+      <h2>Protocol Exchange</h2>
+      <div class="protocol-controls">
+        <button id="ctrl-prev" title="Step back">⏮</button>
+        <button id="ctrl-playpause" title="Play / pause">▶</button>
+        <button id="ctrl-next" title="Step forward">⏭</button>
+        <button id="ctrl-replay" title="Replay">↻</button>
+      </div>
+    </div>
+
+    <div class="panel-body protocol-body">
+      <div class="empty-state" id="emptyState">
+        <p>No activity yet.</p>
+        <p class="muted">Perform an action on the left to see the exact messages exchanged at the application layer.</p>
+      </div>
+
+      <div class="timeline" id="timeline"></div>
+    </div>
+
+    <div class="scrub-row">
+      <input type="range" id="scrubber" min="0" max="0" value="0" />
+      <span id="scrubLabel">0 / 0</span>
+    </div>
+  </section>
+
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
