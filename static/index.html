@@ -3,17 +3,23 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Application Layer Visualizer</title>
+<title>Application + Transport Layer Visualizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
+<div class="ambient-grid"></div>
+<div class="ambient-scanline"></div>
 
 <header class="topbar">
   <div class="topbar-title">
     <span class="topbar-mark">◐</span>
     <div>
-      <h1>Application Layer Visualizer</h1>
-      <p>Act on the left. Watch the wire on the right.</p>
+      <h1>Application + Transport Layer Visualizer</h1>
+      <p>Act on the left. Watch the wire — TCP/UDP and the app-layer protocol — on the right.</p>
     </div>
   </div>
   <div class="topbar-status" id="connectionStatus">
@@ -28,22 +34,29 @@
     <div class="panel-head">
       <h2>Activity</h2>
       <div class="mode-switch" role="tablist">
-        <button class="mode-btn active" data-mode="browse" role="tab">Browsing</button>
-        <button class="mode-btn" data-mode="mail" role="tab">Mail</button>
-        <button class="mode-btn" data-mode="stream" role="tab">Streaming</button>
+        <button class="mode-btn active" data-mode="browse" role="tab">
+          <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 10h15M10 2.5c2.2 2.1 3.3 4.9 3.3 7.5s-1.1 5.4-3.3 7.5c-2.2-2.1-3.3-4.9-3.3-7.5S7.8 4.6 10 2.5z" stroke="currentColor" stroke-width="1.4"/></svg>
+          Browsing
+        </button>
+        <button class="mode-btn" data-mode="mail" role="tab">
+          <svg viewBox="0 0 20 20" fill="none"><rect x="2.5" y="4.5" width="15" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M3.5 5.5l6.5 5.5 6.5-5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Mail
+        </button>
+        <button class="mode-btn" data-mode="stream" role="tab">
+          <svg viewBox="0 0 20 20" fill="none"><rect x="2.5" y="4" width="15" height="10.5" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.3l4.5 2.7-4.5 2.7V7.3z" fill="currentColor"/></svg>
+          Streaming
+        </button>
       </div>
     </div>
 
     <div class="panel-body">
 
-      <!-- Browsing form -->
       <form class="activity-form" id="form-browse" data-mode="browse">
         <label for="browse-url">URL</label>
         <input id="browse-url" type="text" placeholder="www.example.com/page" value="www.example.com" required />
         <button type="submit" class="primary-btn">Visit</button>
       </form>
 
-      <!-- Mail form -->
       <form class="activity-form hidden" id="form-mail" data-mode="mail">
         <label for="mail-to">To</label>
         <input id="mail-to" type="text" placeholder="friend@university.edu" value="friend@university.edu" required />
@@ -54,7 +67,6 @@
         <button type="submit" class="primary-btn">Send</button>
       </form>
 
-      <!-- Streaming form -->
       <form class="activity-form hidden" id="form-stream" data-mode="stream">
         <label for="stream-quality">Quality</label>
         <select id="stream-quality">
@@ -82,29 +94,77 @@
 
   <!-- ============ RIGHT: PROTOCOL PANEL ============ -->
   <section class="panel protocol-panel">
-    <div class="panel-head">
-      <h2>Protocol Exchange</h2>
+
+    <!-- Wire visualization hero -->
+    <div class="hud-frame">
+      <span class="hud-corner tl"></span><span class="hud-corner tr"></span>
+      <span class="hud-corner bl"></span><span class="hud-corner br"></span>
+
+      <div class="wire-hero">
+        <div class="wire-node wire-node-client" id="nodeClient">
+          <span class="wire-ping"></span>
+          <svg viewBox="0 0 40 40" fill="none"><rect x="6" y="8" width="28" height="19" rx="2" stroke="currentColor" stroke-width="2"/><path d="M15 32h10M20 27v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span>Client</span>
+        </div>
+
+        <div class="wire-track">
+          <div class="wire-line" id="wireLine"></div>
+          <div class="wire-packet" id="wirePacket"></div>
+          <div class="wire-caption" id="wireCaption">Waiting for activity…</div>
+        </div>
+
+        <div class="wire-node wire-node-server" id="nodeServer">
+          <span class="wire-ping"></span>
+          <svg viewBox="0 0 40 40" fill="none"><rect x="8" y="5" width="24" height="8" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="8" y="16" width="24" height="8" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="8" y="27" width="24" height="8" rx="1.5" stroke="currentColor" stroke-width="2"/><circle cx="12.5" cy="9" r="1.2" fill="currentColor"/><circle cx="12.5" cy="20" r="1.2" fill="currentColor"/><circle cx="12.5" cy="31" r="1.2" fill="currentColor"/></svg>
+          <span>Server</span>
+        </div>
+      </div>
+
+      <div class="wire-state-row">
+        <span class="conn-state-label">TCP state</span>
+        <span class="conn-state-badge" id="connStateBadge">—</span>
+      </div>
+    </div>
+
+    <div class="view-tabs" role="tablist">
+      <button class="view-tab active" data-view="both" role="tab">Both</button>
+      <button class="view-tab" data-view="application" role="tab">Application Layer</button>
+      <button class="view-tab" data-view="transport" role="tab">Transport Layer</button>
+    </div>
+
+    <div class="panel-mid">
+      <!-- OSI layer rail -->
+      <div class="osi-rail">
+        <div class="osi-layer" data-layer="Application"><span class="osi-dot"></span>Application</div>
+        <div class="osi-layer" data-layer="Transport"><span class="osi-dot"></span>Transport</div>
+        <div class="osi-layer osi-dim" data-layer="Network"><span class="osi-dot"></span>Network</div>
+        <div class="osi-layer osi-dim" data-layer="Link"><span class="osi-dot"></span>Data Link</div>
+        <div class="osi-note">Only Application &amp; Transport are simulated here</div>
+      </div>
+
+      <div class="panel-body protocol-body">
+        <div class="empty-state" id="emptyState">
+          <p>No activity yet.</p>
+          <p class="muted">Perform an action on the left to see the transport-layer (TCP/UDP) and application-layer messages exchanged.</p>
+        </div>
+
+        <div class="timeline" id="timeline"></div>
+      </div>
+    </div>
+
+    <div class="protocol-controls-row">
       <div class="protocol-controls">
         <button id="ctrl-prev" title="Step back">⏮</button>
         <button id="ctrl-playpause" title="Play / pause">▶</button>
         <button id="ctrl-next" title="Step forward">⏭</button>
         <button id="ctrl-replay" title="Replay">↻</button>
       </div>
-    </div>
-
-    <div class="panel-body protocol-body">
-      <div class="empty-state" id="emptyState">
-        <p>No activity yet.</p>
-        <p class="muted">Perform an action on the left to see the exact messages exchanged at the application layer.</p>
+      <div class="scrub-row">
+        <input type="range" id="scrubber" min="0" max="0" value="0" />
+        <span id="scrubLabel">0 / 0</span>
       </div>
-
-      <div class="timeline" id="timeline"></div>
     </div>
 
-    <div class="scrub-row">
-      <input type="range" id="scrubber" min="0" max="0" value="0" />
-      <span id="scrubLabel">0 / 0</span>
-    </div>
   </section>
 
 </main>

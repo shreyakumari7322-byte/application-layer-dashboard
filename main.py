@@ -3,7 +3,7 @@ main.py — FastAPI backend for the Dual-Panel Activity & Protocol Visualizer.
 
 Run with:
     pip install fastapi uvicorn
-    uvicorn main:app --reload
+    python -m uvicorn main:app --reload
 
 Then open http://127.0.0.1:8000
 """
